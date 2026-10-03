@@ -1,0 +1,10 @@
+# policy.yaml, domains.yaml, and allowlist.yaml are all signed
+# (engine/policy_signing.py) -- no line-ending conversion, or checkout on any
+# machine would invalidate the signature.
+policy/policy.yaml -text
+policy/policy.yaml.sig -text
+policy/policy_signing_pubkey.pem -text
+proxy/domains.yaml -text
+proxy/domains.yaml.sig -text
+policy/allowlist.yaml -text
+policy/allowlist.yaml.sig -text

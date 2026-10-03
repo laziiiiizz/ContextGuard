@@ -1,0 +1,7 @@
+# No entries yet -- this is org/personal-specific (e.g. a test AWS key that's
+# intentionally public, a shared team email alias), nothing generic by default.
+#
+# Format, one entry per allowed exact raw value:
+# - value: "AKIAINTENTIONALLYPUBLICTESTKEY"
+#   reason: "Public test fixture, safe to allow"
+[]

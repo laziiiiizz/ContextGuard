@@ -1,0 +1,72 @@
+# Web UI + API hostnames. API hostnames matter as much as web UI ones -- desktop
+# apps, terminal/CLI tools, and SDKs talk to the API domain directly, not the
+# website, so watching only the web UI would miss everything but a browser tab.
+- hostname: chat.openai.com
+  category: chat-web
+  enabled: true
+- hostname: chatgpt.com
+  category: chat-web
+  enabled: true
+- hostname: api.openai.com
+  category: chat-api
+  enabled: true
+- hostname: claude.ai
+  category: chat-web
+  enabled: true
+- hostname: api.anthropic.com
+  category: chat-api
+  enabled: true
+- hostname: gemini.google.com
+  category: chat-web
+  enabled: true
+- hostname: generativelanguage.googleapis.com
+  category: chat-api
+  enabled: true
+- hostname: perplexity.ai
+  category: chat-web
+  enabled: true
+- hostname: api.perplexity.ai
+  category: chat-api
+  enabled: true
+- hostname: huggingface.co
+  category: chat-web
+  enabled: true
+- hostname: api-inference.huggingface.co
+  category: chat-api
+  enabled: true
+# File uploads. Gemini's web app sends an attached file to one of Google's
+# upload servers the moment it is attached (and switches between them), then
+# refers to it by an id in the chat request. Both of the first two were seen
+# in live captures; the third is the one open-source Gemini clients use.
+# These hosts are shared with other Google apps, so only PDF uploads are
+# checked on them (category file-upload); nothing else sent there is inspected.
+- hostname: contribution-rt.usercontent.google.com
+  category: file-upload
+  enabled: true
+- hostname: push.clients6.google.com
+  category: file-upload
+  enabled: true
+# ChatGPT uploads an attached file with a PUT straight to OpenAI's file
+# storage, sdmntpr<region>.oaiusercontent.com (seen in a live capture as
+# sdmntprsouthcentralus). The region differs per user, so the whole domain is
+# watched (subdomains match), upload-only like the Google servers above.
+- hostname: oaiusercontent.com
+  category: file-upload
+  enabled: true
+- hostname: content-push.googleapis.com
+  category: file-upload
+  enabled: true
+- hostname: router.huggingface.co
+  category: chat-api
+  enabled: true
+# Test/mock fixture only (tests/e2e's mock AI server) -- must stay disabled
+# in any real, shipped install. Real finding from an external security
+# review: this shipped `enabled: true`, meaning a real install intercepted
+# a developer's own http://localhost:PORT traffic and could mask-rewrite or
+# block it -- corrupting a local request that never left the machine and
+# was never a leak, with nothing on the client side explaining why. Tests
+# re-enable this for themselves (see tests/e2e/test_addon_pipeline.py's `a`
+# fixture) rather than relying on this file's default.
+- hostname: localhost
+  category: mock
+  enabled: false

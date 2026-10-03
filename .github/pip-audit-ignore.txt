@@ -1,0 +1,28 @@
+# Vulnerability IDs pip-audit skips in CI and release builds. One ID per line.
+# All of these need a newer transitive dependency than mitmproxy 12.2.3 allows.
+# Revisit whenever requirements.txt's mitmproxy pin is bumped.
+
+# cryptography: unreachable code paths / low relevance here
+PYSEC-2026-3552
+PYSEC-2026-3553
+PYSEC-2026-3554
+
+# h2: request-smuggling risk, worth watching, needs h2>=4.4.1
+PYSEC-2026-3628
+
+# msgpack: needs untrusted input we don't feed it
+PYSEC-2026-3625
+
+# tornado: unverified whether mitmdump uses the affected code
+PYSEC-2026-3387
+PYSEC-2026-3388
+PYSEC-2026-3389
+GHSA-pw6j-qg29-8w7f
+GHSA-wwv5-g3v4-889x
+GHSA-8423-8fgw-73vq
+CVE-2026-82397
+
+# tornado, published 2026-09-30: web-server and curl-client paths, fixed in 6.5.9 (mitmproxy 12.2.3 caps tornado at 6.5.5)
+GHSA-chx6-46f5-w4vp
+GHSA-c2m8-h5v5-343r
+GHSA-3hv7-mjh2-fv65

@@ -1,0 +1,68 @@
+name: Release
+
+# Builds the installer. Pushing a version tag (git tag v1.2.0, then
+# git push origin v1.2.0) also publishes it as a GitHub Release.
+# "Run workflow" by hand builds it without publishing, for testing.
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write  # needed to create the Release and upload the installer to it
+
+jobs:
+  build-installer:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - run: python -m pip install --upgrade pip
+      - run: pip install -r requirements-build.txt -r requirements-dev.txt
+
+      # Stop early if the tests fail.
+      - run: pytest tests/
+
+      # Check the exact packages that go into the installer for known
+      # vulnerabilities (ignore list and reasons: .github/pip-audit-ignore.txt).
+      - run: python scripts/run_pip_audit.py
+
+      - name: Build the app (PyInstaller)
+        run: python -m PyInstaller ContextGuard.spec --noconfirm
+
+      - name: Build the installer (Inno Setup)
+        # Inno Setup 6 comes preinstalled on GitHub's Windows runners.
+        run: '& "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" ContextGuard.iss'
+        shell: pwsh
+
+      - name: Write the installer's SHA-256 checksum
+        # Lets users check that the file they downloaded is exactly this build.
+        run: |
+          $hash = (Get-FileHash installer_output\ContextGuard-Setup.exe -Algorithm SHA256).Hash.ToLower()
+          "$hash  ContextGuard-Setup.exe" | Out-File -Encoding ascii installer_output\ContextGuard-Setup.exe.sha256
+          Get-Content installer_output\ContextGuard-Setup.exe.sha256
+        shell: pwsh
+
+      - uses: actions/upload-artifact@v5
+        with:
+          name: ContextGuard-Setup
+          path: |
+            installer_output\ContextGuard-Setup.exe
+            installer_output\ContextGuard-Setup.exe.sha256
+
+      - name: Attach the installer to the GitHub Release
+        if: startsWith(github.ref, 'refs/tags/')
+        # Pinned to an exact commit, not the movable `v2` tag: this step can
+        # write to the repo, so a moved tag could take over the release.
+        # Check the commit against the real v2 tag before ever changing it.
+        uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65 # v2
+        with:
+          files: |
+            installer_output\ContextGuard-Setup.exe
+            installer_output\ContextGuard-Setup.exe.sha256
+          generate_release_notes: true

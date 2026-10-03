@@ -1,0 +1,295 @@
+[
+  {
+    "id": "bx-001",
+    "text": "here is my key AKIAABCDEFGHIJKLMNOP",
+    "category": "secret.aws_access_token",
+    "severity": "high",
+    "expected_action": "block",
+    "source": "synthetic",
+    "reviewer_status": "reviewed"
+  },
+  {
+    "id": "bx-002",
+    "text": "contact me at john@acme.com",
+    "category": "pii.email",
+    "severity": "medium",
+    "expected_action": "transform",
+    "source": "synthetic",
+    "reviewer_status": "reviewed"
+  },
+  {
+    "id": "bx-003",
+    "text": "-----BEGIN RSA PRIVATE KEY-----",
+    "category": "secret.generic_private_key",
+    "severity": "high",
+    "expected_action": "block",
+    "source": "synthetic",
+    "reviewer_status": "reviewed"
+  },
+  {
+    "id": "bx-004",
+    "text": "token: sk_live_abcdefghijklmnopqrstuvwx",
+    "category": "secret.stripe_key",
+    "severity": "high",
+    "expected_action": "block",
+    "source": "synthetic",
+    "reviewer_status": "reviewed"
+  },
+  {
+    "id": "bx-005",
+    "text": "here is an encoded token: QUtJQUFCQ0RFRkdISUpLTE1OT1BTRUNSRVRWQUxVRTEyMzQ1Njc4OTA=",
+    "category": "secret.high_entropy_token",
+    "severity": "medium",
+    "expected_action": "warn",
+    "source": "synthetic-adversarial",
+    "reviewer_status": "reviewed",
+    "note": "base64-encoded secret, defeats regex, caught by entropy backstop."
+  },
+  {
+    "id": "bx-006",
+    "text": "AKIA ABCDEFGHIJKLMNOP",
+    "category": "secret.aws_access_token",
+    "severity": "high",
+    "expected_action": "block",
+    "source": "synthetic-adversarial",
+    "reviewer_status": "reviewed",
+    "note": "Space injected mid-token. Was a known_gap until engine/detectors/regex_rules.py's SPACE_TOLERANT_RULES added an anchor-bounded space-tolerant scan for a handful of high-value prefixes (AWS, GitHub, Slack, Stripe, OpenAI, Anthropic, npm) -- fixed 2026-09-10, no longer a gap. Scoped to a small window after a distinctive literal anchor, not message-wide (a message-wide space strip would fuse unrelated words together constantly, unlike the rarer line breaks bx-014 could safely collapse)."
+  },
+  {
+    "id": "bx-007",
+    "text": "xoxb-1234567890-1234567890123-abcdefghijklmnop",
+    "category": "secret.slack_bot_token",
+    "severity": "high",
+    "expected_action": "block",
+    "source": "synthetic",
+    "reviewer_status": "reviewed"
+  },
+  {
+    "id": "bx-008",
+    "text": "here is the token npm_abcdefghijklmnopqrstuvwxyz0123456789",
+    "category": "secret.npm_access_token",
+    "severity": "high",
+    "expected_action": "block",
+    "source": "synthetic",
+    "reviewer_status": "reviewed"
+  },
+  {
+    "id": "bx-009",
+    "text": "auth: eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMjM0NTY3ODkwIn0.dQw4w9WgXcQ",
+    "category": "secret.jwt",
+    "severity": "high",
+    "expected_action": "block",
+    "source": "synthetic",
+    "reviewer_status": "reviewed"
+  },
+  {
+    "id": "bx-010",
+    "text": "AKIA​ABCDEFGHIJKLMNOP",
+    "category": "secret.aws_access_token",
+    "severity": "high",
+    "expected_action": "block",
+    "source": "synthetic-adversarial",
+    "reviewer_status": "reviewed",
+    "note": "Zero-width space inside the token; normalize.py strips it, so this is caught."
+  },
+  {
+    "id": "bx-011",
+    "text": "```AKIAABCDEFGHIJKLMNOP```",
+    "category": "secret.aws_access_token",
+    "severity": "high",
+    "expected_action": "block",
+    "source": "synthetic-adversarial",
+    "reviewer_status": "reviewed",
+    "note": "Markdown code-fence wrapping doesn't break detection."
+  },
+  {
+    "id": "bx-012",
+    "text": "AKIAАВСDEFGHIJKLMNOP",
+    "category": "secret.aws_access_token",
+    "severity": "high",
+    "expected_action": "block",
+    "source": "synthetic-adversarial",
+    "reviewer_status": "reviewed",
+    "note": "Cyrillic look-alike characters (АВС) substituted mid-token. Was a known_gap (the regex's [A-Z2-7] char class doesn't match non-Latin codepoints) until engine/normalize.py added a curated Cyrillic/Greek-to-Latin confusables fold, run before every detector -- fixed 2026-09-10, no longer a gap."
+  },
+  {
+    "id": "bx-013",
+    "text": "Ѕentry token abc123abc123abc123abc123abc123abc123abc123abc123abc123abc123abc123",
+    "category": "secret.sentry_access_token",
+    "severity": "medium",
+    "expected_action": "warn",
+    "source": "synthetic-adversarial",
+    "reviewer_status": "reviewed",
+    "note": "Cyrillic Ѕ substituted for the leading 'S' in the keyword. Same fix as bx-012 -- normalize.py's confusables fold runs before context_rules.py's keyword regex too, so this is caught now."
+  },
+  {
+    "id": "bx-014",
+    "text": "sentry token abc123abc123abc123abc123abc123abc123\nabc123abc123abc123abc123abc123abc",
+    "category": "secret.sentry_access_token",
+    "severity": "medium",
+    "expected_action": "warn",
+    "source": "synthetic-adversarial",
+    "reviewer_status": "reviewed",
+    "note": "Value split across a newline (e.g. a wrapped paste or a value split across two chat lines). Was a known_gap until engine/normalize.py added strip_line_breaks_for_detection() (detection-only, with span translation back to the original text) -- fixed 2026-09-10, no longer a gap. bx-006's space-injection variant remains a deliberate, unfixed gap: collapsing spaces (unlike line breaks) would be unsafe at the scale of ordinary prose."
+  },
+  {
+    "id": "bx-015",
+    "text": "sentry token abc123abc123ab​c123abc123abc123abc123abc123abc123abc123abc123abc123abc",
+    "category": "secret.sentry_access_token",
+    "severity": "medium",
+    "expected_action": "warn",
+    "source": "synthetic-adversarial",
+    "reviewer_status": "reviewed",
+    "note": "Zero-width space embedded inside a keyword-context rule's value (context_rules.py, not the AWS prefix rule bx-010 already covers). normalize.py strips it before detection runs, so this is caught -- confirms the zero-width-strip defense generalizes to the newer detector class, not just the original prefix rules."
+  },
+  {
+    "id": "bx-016",
+    "text": "c2VudHJ5IHRva2VuIDE5YTJlYmYyMTgwNjA0MTNmZDRlYWE1YTk1NDlkZDMxOWM0NTAyYTQ1NjI0NTk4NjQ5MzE3NTFlZDlkYTVlNGQ=",
+    "category": "secret.high_entropy_token",
+    "severity": "medium",
+    "expected_action": "warn",
+    "source": "synthetic-adversarial",
+    "reviewer_status": "reviewed",
+    "note": "Base64-encoded 'sentry token <real-looking hex secret>' phrase -- defeats every regex and keyword-context rule since the keyword itself is hidden inside the encoding, but the Shannon-entropy backstop still flags the encoded blob itself as a high-entropy token. Confirms defense-in-depth actually holds against a real encoding-evasion attempt, not just an aspiration in BENCHMARK.md."
+  },
+  {
+    "id": "bx-017",
+    "text": "AKIA\tABCDEFGHIJKLMNOP",
+    "category": "secret.aws_access_token",
+    "severity": "high",
+    "expected_action": "block",
+    "source": "synthetic-adversarial",
+    "reviewer_status": "reviewed",
+    "note": "Tab character injected mid-token, the tab-specific sibling of bx-006 (space injection). Caught by the same anchor-bounded space-tolerant scan in regex_rules.py -- found during verification of the bx-006 fix (the first version only stripped literal spaces, not tabs, from the scan window) and fixed the same way before shipping."
+  },
+  {
+    "id": "bx-018",
+    "text": "AKIA‮ABCDEFGHIJKLMNOP",
+    "category": "secret.aws_access_token",
+    "severity": "high",
+    "expected_action": "block",
+    "source": "synthetic-adversarial",
+    "reviewer_status": "reviewed",
+    "note": "Unicode RIGHT-TO-LEFT OVERRIDE (U+202E) injected mid-token -- the 'Trojan Source' class of attack (CVE-2021-42574), can make text render differently than its actual character order. Caught by engine/normalize.py stripping bidirectional-override/isolate control characters, extending the existing zero-width-character strip (these are the same class of always-invisible, never-meaningful-content characters, so stripping them globally carries none of the risk that ruled out a global fix for homoglyphs or line breaks)."
+  },
+  {
+    "id": "bx-019",
+    "text": "AKIA⁠ABCDEFGHIJKLMNOP",
+    "category": "secret.aws_access_token",
+    "severity": "high",
+    "expected_action": "block",
+    "source": "synthetic-adversarial",
+    "reviewer_status": "reviewed",
+    "note": "Unicode WORD JOINER (U+2060) injected mid-token -- a zero-width format character (category Cf) with no visible-content role, same class as bx-018's bidi-override but a different specific character not previously in INVISIBLE_CHARS. Found by systematically probing candidate zero-width/format characters against the real pipeline, not by name recall. Fixed by adding it to engine/normalize.py's INVISIBLE_CHARS."
+  },
+  {
+    "id": "bx-020",
+    "text": "AKIA᠎ABCDEFGHIJKLMNOP",
+    "category": "secret.aws_access_token",
+    "severity": "high",
+    "expected_action": "block",
+    "source": "synthetic-adversarial",
+    "reviewer_status": "reviewed",
+    "note": "MONGOLIAN VOWEL SEPARATOR (U+180E) injected mid-token -- reclassified from a space separator to a zero-width format character (category Cf) in Unicode 6.3+, with legitimate use only in actual Mongolian-script text, essentially never present in general chat. Fixed the same way as bx-019."
+  },
+  {
+    "id": "bx-021",
+    "text": "AKIA­ABCDEFGHIJKLMNOP",
+    "category": "secret.aws_access_token",
+    "severity": "high",
+    "expected_action": "block",
+    "source": "synthetic-adversarial",
+    "reviewer_status": "reviewed",
+    "note": "SOFT HYPHEN (U+00AD) injected mid-token -- a hyphenation hint that renders invisibly in plain flowing text (category Cf), only ever becomes visible if a line actually wraps at that exact point, which never affects content meaning in chat. Fixed the same way as bx-019."
+  },
+  {
+    "id": "bx-022",
+    "text": "AKIA︀ABCDEFGHIJKLMNOP",
+    "category": "secret.aws_access_token",
+    "severity": "high",
+    "expected_action": "block",
+    "source": "synthetic-adversarial",
+    "reviewer_status": "reviewed",
+    "note": "VARIATION SELECTOR-1 (U+FE00) injected mid-token -- a zero-width nonspacing mark (category Mn) that only selects a presentation style for the PRECEDING character (e.g. emoji vs. text style); has legitimate use adjacent to emoji/CJK characters but never adds visible content of its own, so stripping it doesn't destroy real meaning. All 16 variation selectors (U+FE00-U+FE0F) were added to INVISIBLE_CHARS, not just this one."
+  },
+  {
+    "id": "bx-023",
+    "text": "AKIA͏ABCDEFGHIJKLMNOP",
+    "category": "secret.aws_access_token",
+    "severity": "high",
+    "expected_action": "block",
+    "source": "synthetic-adversarial",
+    "reviewer_status": "reviewed",
+    "note": "COMBINING GRAPHEME JOINER (U+034F) injected mid-token -- explicitly defined by Unicode as an invisible formatting character (category Mn) that exists only to prevent normal ligature/rendering behavior between adjacent characters, functionally the combining-mark equivalent of ZWNJ. Fixed the same way as bx-019."
+  },
+  {
+    "id": "bx-024",
+    "text": "AKIÁABCDEFGHIJKLMNOP",
+    "category": "secret.aws_access_token",
+    "severity": "high",
+    "expected_action": "block",
+    "source": "synthetic-adversarial",
+    "reviewer_status": "reviewed",
+    "note": "Precomposed accented Latin letter (Á, A with acute) substituted mid-token -- a different mechanism from the Cyrillic/Greek homoglyphs (bx-012/013): normalize()'s NFKC step already COMPOSES a base letter + combining accent into this exact precomposed form before detection runs, so the gap is that the composed letter (visually near-identical to plain A) does not match an ASCII-only [A-Z] class. Fixed by extending fold_confusables() with a programmatically-generated Latin-1-Supplement accented-letter fold table (the common Western European set), verified against real French/Spanish/Portuguese/German/Italian prose for zero false positives before shipping."
+  },
+  {
+    "id": "bx-025",
+    "text": "AKIAÁBCDEFGHIJKLMNOP",
+    "category": "secret.aws_access_token",
+    "severity": "high",
+    "expected_action": "block",
+    "source": "synthetic-adversarial",
+    "reviewer_status": "reviewed",
+    "note": "The real-world input shape for bx-024: a combining accent mark (U+0301) typed or pasted right after a plain letter, rather than the already-precomposed form. normalize()'s NFKC step composes this into the exact same precomposed letter bx-024 tests, then the same fold_confusables() fix applies. Confirms the fix closes the gap for both the pre-composed and decomposed real-world input shapes."
+  },
+  {
+    "id": "bx-026",
+    "text": "here is a token xoxb‐1234567890123-1234567890123abcdefghijklmnop",
+    "category": "secret.slack_bot_token",
+    "severity": "high",
+    "expected_action": "block",
+    "source": "synthetic-adversarial",
+    "reviewer_status": "reviewed",
+    "note": "Unicode HYPHEN (U+2010), visually near-identical to ASCII \"-\" in most fonts, substituted for the literal hyphen in a real Slack bot token shape (xoxb-...) -- a different mechanism from the letter homoglyphs (bx-012/013/024/025): the marker anchor itself, not the value portion, is what's substituted. Not covered by NFKC (unlike the fullwidth hyphen, which already folds). Fixed by extending fold_confusables() with the common non-NFKC-covered dash lookalikes (HYPHEN, NON-BREAKING HYPHEN, FIGURE DASH, EN DASH, EM DASH, MINUS SIGN), verified against dense hyphenated-compound-word prose, page ranges, and negative numbers for zero false positives before shipping."
+  },
+  {
+    "id": "bx-027",
+    "text": "please charge my card 4242 4242 4242 4242 for the invoice",
+    "category": "pii.credit_card",
+    "severity": "high",
+    "expected_action": "block",
+    "source": "synthetic",
+    "reviewer_status": "reviewed",
+    "note": "A real, publicly-published Visa test number (Stripe's own integration-test card), space-grouped the way a person would actually type it. Round 17 PII-breadth addition: Luhn-checksum + BIN-range validated (engine/detectors/regex_rules.py's find_credit_cards()), not a bare 16-digit-run match, specifically to keep this from flagging ordinary long reference/order numbers -- see bx-028 for that negative case."
+  },
+  {
+    "id": "bx-028",
+    "text": "your order number 9999999999999999 has shipped",
+    "category": "pii.credit_card",
+    "severity": "high",
+    "expected_action": "allow",
+    "source": "synthetic",
+    "reviewer_status": "reviewed",
+    "note": "Negative case for bx-027: same digit-count as a real card number, but no real card network starts with \"99\" -- must never be flagged regardless of Luhn outcome. Confirms the BIN-prefix check is load-bearing, not just the checksum."
+  },
+  {
+    "id": "bx-029",
+    "text": "for the background check, my ssn is 123-45-6789",
+    "category": "pii.ssn",
+    "severity": "high",
+    "expected_action": "block",
+    "source": "synthetic",
+    "reviewer_status": "reviewed",
+    "note": "Round 17 PII-breadth addition: dash-separated SSN shape, area/group/serial all inside the SSA's actually-issuable ranges (engine/detectors/regex_rules.py's pii.ssn). 123-45-6789 is a widely-used fictional/example SSN, not a real person's."
+  },
+  {
+    "id": "bx-030",
+    "text": "tracking number 123456789 for your package",
+    "category": "pii.ssn",
+    "severity": "high",
+    "expected_action": "allow",
+    "source": "synthetic",
+    "reviewer_status": "reviewed",
+    "note": "Negative case for bx-029: a bare 9-digit run with no separators and no SSN-related keyword nearby must not be flagged by the strict standalone rule -- see pii.ssn_context in context_rules.py for the deliberately weaker, keyword-gated fallback that exists specifically for this shape when an actual \"ssn\"/\"social security\" keyword is present."
+  }
+]

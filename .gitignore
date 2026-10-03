@@ -1,0 +1,23 @@
+venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+*.db
+.env
+*.pem
+*.key
+sbom.json
+ca_store/
+diag.log
+last_addon_error.log
+unrecognized_shapes.log
+.system_proxy_state.json
+settings.json
+settings.json.tmp
+build/
+dist/
+installer_output/
+
+# public half of the policy-signing keypair -- must be committed
+!policy/policy_signing_pubkey.pem
+git-hooks/
