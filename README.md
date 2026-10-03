@@ -39,8 +39,6 @@ It knows more than 200 API key formats (AWS, GitHub, OpenAI, Stripe, Slack, Goog
 
 
 
-https://github.com/user-attachments/assets/808c4ef9-19ad-4e68-af26-640bbb8a95ea
-
 
 
 ## Install
