@@ -154,3 +154,25 @@ def test_repair_leaves_other_tools_hooks_alone(sandbox):
     git('config', '--global', 'core.hooksPath', str(tmp_path / 'someone-elses-hooks'))
     install.repair()
     assert not (tmp_path / 'hooks').exists()
+
+
+def test_push_still_checked_when_github_has_a_commit_we_dont_have(sandbox, tmp_path):
+    # Seen live: the README was edited on the GitHub website, so the remote's
+    # newest commit was missing locally and the check crashed instead of running.
+    git, repo, _tmp = sandbox
+    other = tmp_path / 'other'
+    git('clone', '-q', str(tmp_path / 'remote.git'), str(other))
+    (other / 'notes.md').write_text('edited elsewhere\n')
+    git('add', 'notes.md', cwd=other)
+    git('commit', '-q', '-m', 'edit on GitHub', cwd=other)
+    git('push', '-q', 'origin', 'main', cwd=other)
+
+    install.enable()
+    (repo / '.env').write_text('TOKEN=abc\n')
+    git('add', '.env', cwd=repo)
+    git('commit', '-q', '--no-verify', '-m', 'env', cwd=repo)
+    # Make the pre-push hook see the remote's newer commit without fetching it.
+    result = git('push', 'origin', 'main', '--force-with-lease=main:' + git('ls-remote', 'origin', 'main', cwd=repo).stdout.split()[0],
+                 cwd=repo, check=False)
+    assert 'ContextGuard stopped this push' in result.stderr
+    assert 'could not check' not in result.stderr

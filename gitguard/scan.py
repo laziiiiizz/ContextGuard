@@ -45,6 +45,12 @@ def _git(args: list[str], cwd=None) -> str:
     return result.stdout.decode('utf-8', errors='replace')
 
 
+def _have_commit(sha: str, cwd=None) -> bool:
+    result = subprocess.run(['git', 'cat-file', '-e', f'{sha}^{{commit}}'], cwd=cwd, capture_output=True,
+                            creationflags=getattr(subprocess, 'CREATE_NO_WINDOW', 0))
+    return result.returncode == 0
+
+
 def added_lines_by_file(patch: str) -> dict[str, str]:
     """Splits `git diff -U0` / `git log -p -U0` output into the added lines
     of each file."""
@@ -97,8 +103,13 @@ def push_report(stdin_text: str, scanner, cwd=None) -> Report:
         _local_ref, local_sha, _remote_ref, remote_sha = parts
         if local_sha == ZERO_SHA:
             continue  # deleting a remote branch sends no content
-        # A new remote branch: everything not already on any remote.
-        rev_range = [local_sha, '--not', '--remotes'] if remote_sha == ZERO_SHA else [f'{remote_sha}..{local_sha}']
+        # A new remote branch, or a remote commit we don't have yet (someone
+        # pushed or edited on GitHub since our last pull): check everything
+        # not already on a remote we know about.
+        if remote_sha == ZERO_SHA or not _have_commit(remote_sha, cwd):
+            rev_range = [local_sha, '--not', '--remotes']
+        else:
+            rev_range = [f'{remote_sha}..{local_sha}']
         names = _git(['log', '--name-only', '--diff-filter=ACMR', '--pretty=format:', '-z', *rev_range], cwd)
         paths.extend(p.strip('\n') for p in names.split('\0') if p.strip('\n'))
         patches.append(_git(['log', '-p', '-U0', '--no-color', '--no-ext-diff', '--diff-filter=ACMR',

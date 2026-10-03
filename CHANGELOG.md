@@ -3,6 +3,13 @@
 All notable changes to ContextGuard are documented here. Format loosely follows
 [Keep a Changelog](https://keepachangelog.com/).
 
+## [1.2.1] - 2026-10-03
+
+### Fixed
+- Git protection could not check a push when GitHub had a newer commit than your computer (for example
+  after editing a file on the GitHub website). It printed "could not check this change" and let the push
+  through. It now checks your new commits in that case too.
+
 ## [1.2.0] - 2026-10-03
 
 ### Security

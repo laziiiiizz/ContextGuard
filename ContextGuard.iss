@@ -20,7 +20,7 @@
 ; /VERYSILENT ...`) or cmd.exe instead, never a POSIX shell.
 
 #define MyAppName "ContextGuard"
-#define MyAppVersion "1.2.0"
+#define MyAppVersion "1.2.1"
 #define MyAppExeName "ContextGuard.exe"
 
 [Setup]
