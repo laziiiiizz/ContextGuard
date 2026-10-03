@@ -56,7 +56,8 @@ Windows 10 or 11. No admin rights needed. It installs only for your own Windows 
 **Step 1. Open PowerShell.** Press the Windows key, type `PowerShell` and press Enter.
 
 **Step 2. Download the installer and check it.** Copy these lines, paste them into PowerShell and
-press Enter:
+press Enter. Copy them exactly as they are: don't replace `USERPROFILE` with your name, Windows
+fills it in for you.
 
 ```powershell
 $ProgressPreference = 'SilentlyContinue'
