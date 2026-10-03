@@ -21,3 +21,4 @@ installer_output/
 # public half of the policy-signing keypair -- must be committed
 !policy/policy_signing_pubkey.pem
 git-hooks/
+brag-output/

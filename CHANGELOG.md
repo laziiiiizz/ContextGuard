@@ -3,7 +3,7 @@
 All notable changes to ContextGuard are documented here. Format loosely follows
 [Keep a Changelog](https://keepachangelog.com/).
 
-## [1.2.0] - 2026-09-27
+## [1.2.0] - 2026-10-03
 
 ### Security
 - HuggingChat's web UI (multipart/form-data with the message in a JSON `data` field) is now parsed:
